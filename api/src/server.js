@@ -6,7 +6,12 @@ import {
   validatorCompiler,
   jsonSchemaTransform,
 } from "@fastify/type-provider-zod";
-import { z } from "zod/v4";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "@prisma/client";
+import { UsuarioSchema } from "../prisma/generated/zod/index.ts";
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 const app = Fastify({ logger: true });
 
@@ -29,18 +34,20 @@ await app.register(fastifySwaggerUI, {
 });
 
 app.post(
-  "/users",
+  "/usuarios",
   {
     schema: {
-      body: z.object({
-        name: z.string().min(1),
-        email: z.string().email(),
-      }),
+      body: UsuarioSchema.omit({ id: true, criadoEm: true, status: true }),
     },
   },
   async (request, reply) => {
-    return { received: request.body };
+    const usuario = await prisma.usuario.create({ data: request.body });
+    return usuario;
   },
 );
+
+app.get("/usuarios", async (request, reply) => {
+  return prisma.usuario.findMany();
+});
 
 app.listen({ port: 3000, host: "0.0.0.0" });

@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator zod {
+  provider = "zod-prisma-types"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TipoUsuario {
+  MOTORISTA
+  ATENDENTE
+}
+
+enum StatusUsuario {
+  ONLINE
+  OFFLINE
+}
+
+enum StatusAtendimento {
+  NAO_INICIADO
+  EM_ANDAMENTO
+  FINALIZADO
+}
+
+model Usuario {
+  id       String        @id @default(uuid())
+  email    String        @unique
+  senha    String
+  tipo     TipoUsuario
+  telefone String
+  status   StatusUsuario @default(OFFLINE)
+
+  veiculo               Veiculo?
+  atendimentosRegistrados Atendimento[] @relation("AtendenteAtendimentos")
+  conversasComoAtendente  Conversa[]    @relation("AtendenteConversas")
+  conversasComoMotorista  Conversa[]    @relation("MotoristaConversas")
+  mensagensEnviadas       Mensagem[]
+
+  criadoEm DateTime @default(now())
+}
+
+model Veiculo {
+  id        String  @id @default(uuid())
+  placa     String  @unique
+  latitude  Float
+  longitude Float
+
+  motoristaId String  @unique
+  motorista   Usuario @relation(fields: [motoristaId], references: [id])
+
+  atendimentos VeiculoAtendimento[]
+}
+
+model Atendimento {
+  id                    String   @id @default(uuid())
+  protocolo             String   @unique
+  endereco              String
+  localDeRetorno         String
+  oQueAconteceu          String
+  estadoDoPaciente       String
+  idadeAparente          Int?
+  quantidadeDePacientes  Int
+  estadoDaLesao          String
+  observacoes            String?
+
+  atendenteId String
+  atendente   Usuario @relation("AtendenteAtendimentos", fields: [atendenteId], references: [id])
+
+  veiculos      VeiculoAtendimento[]
+  notificacoes  Notificacao[]
+
+  criadoEm DateTime @default(now())
+}
+
+model VeiculoAtendimento {
+  id            String            @id @default(uuid())
+  status        StatusAtendimento @default(NAO_INICIADO)
+
+  veiculoId     String
+  veiculo       Veiculo     @relation(fields: [veiculoId], references: [id])
+
+  atendimentoId String
+  atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
+}
+
+model Conversa {
+  id String @id @default(uuid())
+
+  atendenteId String
+  atendente   Usuario @relation("AtendenteConversas", fields: [atendenteId], references: [id])
+
+  motoristaId String
+  motorista   Usuario @relation("MotoristaConversas", fields: [motoristaId], references: [id])
+
+  mensagens Mensagem[]
+}
+
+model Mensagem {
+  id           String   @id @default(uuid())
+  texto        String
+  dataDeEnvio  DateTime @default(now())
+
+  quemMandouId String
+  quemMandou   Usuario  @relation(fields: [quemMandouId], references: [id])
+
+  conversaId String
+  conversa   Conversa @relation(fields: [conversaId], references: [id])
+}
+
+model Notificacao {
+  id               String   @id @default(uuid())
+  mensagem         String
+  dataDaNotificacao DateTime @default(now())
+
+  atendimentoId String
+  atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
+}

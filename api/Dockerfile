@@ -1,5 +1,6 @@
 # ---- Base ----
 FROM node:22-alpine AS base
+RUN npm install -g npm@11
 WORKDIR /usr/src/app
 COPY package*.json ./
 
@@ -15,6 +16,7 @@ COPY . .
 
 # ---- Production ----
 FROM node:22-alpine AS production
+RUN npm install -g npm@11
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
 COPY --from=deps /usr/src/app/node_modules ./node_modules
