@@ -10,112 +10,112 @@ datasource db {
   provider = "postgresql"
 }
 
-enum TipoUsuario {
-  MOTORISTA
-  ATENDENTE
+enum UserRole {
+  DRIVER
+  ATTENDANT
 }
 
-enum StatusUsuario {
+enum UserStatus {
   ONLINE
   OFFLINE
 }
 
-enum StatusAtendimento {
-  NAO_INICIADO
-  EM_ANDAMENTO
-  FINALIZADO
+enum EmergencyCallStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  FINISHED
 }
 
-model Usuario {
-  id       String        @id @default(uuid())
-  email    String        @unique
-  senha    String
-  tipo     TipoUsuario
-  telefone String
-  status   StatusUsuario @default(OFFLINE)
+model User {
+  id       String     @id @default(uuid())
+  email    String     @unique
+  password String
+  role     UserRole
+  phone    String
+  status   UserStatus @default(OFFLINE)
 
-  veiculo               Veiculo?
-  atendimentosRegistrados Atendimento[] @relation("AtendenteAtendimentos")
-  conversasComoAtendente  Conversa[]    @relation("AtendenteConversas")
-  conversasComoMotorista  Conversa[]    @relation("MotoristaConversas")
-  mensagensEnviadas       Mensagem[]
+  vehicle              Vehicle?
+  registeredCalls      EmergencyCall[]        @relation("AttendantCalls")
+  conversationsAsAttendant Conversation[]     @relation("AttendantConversations")
+  conversationsAsDriver    Conversation[]     @relation("DriverConversations")
+  sentMessages             Message[]
 
-  criadoEm DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
-model Veiculo {
-  id        String  @id @default(uuid())
-  placa     String  @unique
+model Vehicle {
+  id        String @id @default(uuid())
+  plate     String @unique
   latitude  Float
   longitude Float
 
-  motoristaId String  @unique
-  motorista   Usuario @relation(fields: [motoristaId], references: [id])
+  driverId String  @unique
+  driver   User    @relation(fields: [driverId], references: [id])
 
-  atendimentos VeiculoAtendimento[]
+  emergencyCalls VehicleEmergencyCall[]
 }
 
-model Atendimento {
-  id                    String   @id @default(uuid())
-  protocolo             String   @unique
-  endereco              String
-  localDeRetorno         String
-  oQueAconteceu          String
-  estadoDoPaciente       String
-  idadeAparente          Int?
-  quantidadeDePacientes  Int
-  estadoDaLesao          String
-  observacoes            String?
+model EmergencyCall {
+  id                  String  @id @default(uuid())
+  protocol            String  @unique
+  address             String
+  returnLocation      String
+  whatHappened        String
+  patientCondition    String
+  apparentAge         Int?
+  patientCount        Int
+  injuryCondition     String
+  observations        String?
 
-  atendenteId String
-  atendente   Usuario @relation("AtendenteAtendimentos", fields: [atendenteId], references: [id])
+  attendantId String
+  attendant   User @relation("AttendantCalls", fields: [attendantId], references: [id])
 
-  veiculos      VeiculoAtendimento[]
-  notificacoes  Notificacao[]
+  vehicles      VehicleEmergencyCall[]
+  notifications Notification[]
 
-  criadoEm DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
-model VeiculoAtendimento {
-  id            String            @id @default(uuid())
-  status        StatusAtendimento @default(NAO_INICIADO)
+model VehicleEmergencyCall {
+  id     String              @id @default(uuid())
+  status EmergencyCallStatus @default(NOT_STARTED)
 
-  veiculoId     String
-  veiculo       Veiculo     @relation(fields: [veiculoId], references: [id])
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id])
 
-  atendimentoId String
-  atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
+  emergencyCallId String
+  emergencyCall   EmergencyCall @relation(fields: [emergencyCallId], references: [id])
 }
 
-model Conversa {
+model Conversation {
   id String @id @default(uuid())
 
-  atendenteId String
-  atendente   Usuario @relation("AtendenteConversas", fields: [atendenteId], references: [id])
+  attendantId String
+  attendant   User @relation("AttendantConversations", fields: [attendantId], references: [id])
 
-  motoristaId String
-  motorista   Usuario @relation("MotoristaConversas", fields: [motoristaId], references: [id])
+  driverId String
+  driver   User @relation("DriverConversations", fields: [driverId], references: [id])
 
-  mensagens Mensagem[]
+  messages Message[]
 }
 
-model Mensagem {
-  id           String   @id @default(uuid())
-  texto        String
-  dataDeEnvio  DateTime @default(now())
+model Message {
+  id      String   @id @default(uuid())
+  text    String
+  sentAt  DateTime @default(now())
 
-  quemMandouId String
-  quemMandou   Usuario  @relation(fields: [quemMandouId], references: [id])
+  senderId String
+  sender   User     @relation(fields: [senderId], references: [id])
 
-  conversaId String
-  conversa   Conversa @relation(fields: [conversaId], references: [id])
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
 }
 
-model Notificacao {
-  id               String   @id @default(uuid())
-  mensagem         String
-  dataDaNotificacao DateTime @default(now())
+model Notification {
+  id        String   @id @default(uuid())
+  message   String
+  notifiedAt DateTime @default(now())
 
-  atendimentoId String
-  atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
+  emergencyCallId String
+  emergencyCall   EmergencyCall @relation(fields: [emergencyCallId], references: [id])
 }
