@@ -1,6 +1,6 @@
 # RotaSAMU
 
-API back-end do **RotaSAMU**, um sistema de apoio ao despacho de chamados de emergência no contexto do SAMU. Atendentes registram chamados, motoristas acompanham os veículos, os dois lados conversam por mensagens e o sistema calcula rotas e simula a movimentação do veículo até o local da ocorrência.
+API back-end do **RotaSAMU**, um sistema de apoio ao atendimento de chamados de emergência. Atendentes registram chamados, motoristas atendem aos chamados, os dois lados conversam por mensagens e o sistema calcula rotas e simula a movimentação do veículo até o local da ocorrência.
 
 ## Funcionalidades
 
@@ -110,21 +110,6 @@ docker compose exec api npx prisma migrate deploy
 
 As portas mudam se você definiu `API_PORT` ou `PGADMIN_PORT` no `.env`.
 
-### Executando sem Docker
-
-Requer Node.js 22 e um PostgreSQL acessível.
-
-```bash
-cd api
-npm install
-export DATABASE_URL="postgres://usuario:senha@localhost:5432/rotasamu"
-npx prisma generate
-npx prisma migrate deploy
-npm run dev      # desenvolvimento, com nodemon
-# ou
-npm start        # execução simples
-```
-
 ## Endpoints
 
 A documentação completa, com os schemas de entrada, fica em `/docs`. Resumo:
@@ -197,25 +182,9 @@ User ──1:1── Vehicle ──< VehicleEmergencyCall >── EmergencyCall 
 - **Conversation** e **Message**: chat entre um atendente e um motorista.
 - **Notification**: avisos associados a um chamado.
 
-## Comandos úteis
-
-```bash
-# Prisma (dentro de api/ ou via docker compose exec api)
-npx prisma migrate dev --name nome-da-migracao   # criar nova migração
-npx prisma migrate deploy                         # aplicar migrações existentes
-npx prisma generate                               # regenerar o client e os schemas Zod
-
-# Docker
-docker compose logs -f api                        # logs da API
-docker compose down                               # parar os serviços
-docker compose down -v                            # parar e apagar os volumes (apaga o banco)
-```
-
 ## Estado atual e limitações
 
-- O projeto contém apenas a API; não há front-end neste repositório.
 - O login não emite token: ele valida as credenciais e marca o usuário como online. As rotas não exigem autenticação.
 - Não há rotas para cadastrar veículos, vincular veículos a chamados ou criar notificações. Esses registros precisam ser inseridos diretamente no banco por enquanto.
 - O cálculo de rotas usa o servidor público de demonstração do OSRM (`router.project-osrm.org`), que exige acesso à internet e tem limites de uso.
-- As simulações ficam na memória do processo e são perdidas ao reiniciar a API.
 - Não há testes automatizados nem licença definida.
