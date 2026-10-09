@@ -8,7 +8,6 @@ import {
 } from "./simulation.service.js";
 
 export default async function routingRoutes(app) {
-
   app.get(
     "/preview",
     { schema: { tags: ["Rotas (GPS)"], querystring: previewQuerySchema } },

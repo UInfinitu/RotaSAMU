@@ -1,4 +1,3 @@
-
 import { prisma } from "#db/prisma.js";
 import { getRoute } from "./routing.service.js";
 
@@ -22,7 +21,6 @@ function distanceBetween(a, b) {
 
   return 2 * EARTH_RADIUS_METERS * Math.asin(Math.sqrt(h));
 }
-
 
 function buildCumulativeDistances(coordinates) {
   const cumulative = [0];
@@ -106,7 +104,11 @@ export async function startSimulation({
     }
   }, tickMs);
 
-  activeSimulations.set(vehicleId, { intervalId, route, startedAt: Date.now() });
+  activeSimulations.set(vehicleId, {
+    intervalId,
+    route,
+    startedAt: Date.now(),
+  });
 
   return {
     distanceMeters: route.distanceMeters,

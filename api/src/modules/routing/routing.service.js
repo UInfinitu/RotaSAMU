@@ -9,7 +9,6 @@ export class RouteNotFoundError extends Error {
   }
 }
 
-
 export async function getRoute({ originLat, originLng, destLat, destLng }) {
   const coordinatesParam = `${originLng},${originLat};${destLng},${destLat}`;
   const url = `${OSRM_BASE_URL}/${coordinatesParam}?overview=full&geometries=geojson`;
@@ -29,7 +28,6 @@ export async function getRoute({ originLat, originLng, destLat, destLng }) {
   const route = data.routes[0];
 
   return {
-
     coordinates: route.geometry.coordinates.map(([lng, lat]) => ({
       lat,
       lng,
