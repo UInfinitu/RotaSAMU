@@ -1,11 +1,11 @@
 import { z } from "zod/v4";
 
-import { getRoute } from "./routing.service.js";
 import {
+  getRoute,
   startSimulation,
   stopSimulation,
   isSimulating,
-} from "./simulation.service.js";
+} from "./routing.service.js";
 
 export default async function routingRoutes(app) {
   app.get(
@@ -35,6 +35,8 @@ export default async function routingRoutes(app) {
     (request) => ({ running: isSimulating(request.params.vehicleId) }),
   );
 }
+
+// Private
 
 const vehicleIdParamSchema = z.object({ vehicleId: z.string().uuid() });
 
