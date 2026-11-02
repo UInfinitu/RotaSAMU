@@ -81,8 +81,6 @@ PGADMIN_PASSWORD=troque-esta-senha
 
 # Opcionais (valores padrão abaixo)
 API_PORT=3001
-# Origens do front end liberadas no CORS (separadas por vírgula)
-CORS_ORIGIN=http://localhost:3000
 DB_PORT=5432
 PGADMIN_PORT=5050
 NODE_ENV=development
@@ -102,13 +100,29 @@ Com os containers rodando, em outro terminal:
 docker compose exec api npx prisma migrate deploy
 ```
 
+### 4.5 Instalar o pacote do CORS
+
+No mesmo terminal:
+
+```bash
+docker compose exec api npm install @fastify/cors
+```
+
+### 4.8 Instalar o pacote do CORS
+
+No mesmo terminal:
+
+```bash
+docker compose restart api
+```
+
 ### 5. Acessar
 
-| Serviço                   | URL                        |
-| ------------------------- | -------------------------- |
-| API                       | http://localhost:3001      |
+| Serviço | URL |
+| --- | --- |
+| API | http://localhost:3001 |
 | Documentação (Swagger UI) | http://localhost:3001/docs |
-| pgAdmin                   | http://localhost:5050      |
+| pgAdmin | http://localhost:5050 |
 
 As portas mudam se você definiu `API_PORT` ou `PGADMIN_PORT` no `.env`.
 

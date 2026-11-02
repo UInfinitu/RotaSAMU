@@ -7,9 +7,7 @@ import {
   validatorCompiler,
   jsonSchemaTransform,
 } from "@fastify/type-provider-zod";
-import { randomUUID } from "node:crypto";
-
-import { CORS_ORIGIN, IS_DEVELOPMENT } from "#config/constants.js";
+import cors from "@fastify/cors";
 import { AppError } from "#utils/errors.js";
 import { fromPrismaError } from "#utils/prisma-errors.js";
 
@@ -23,15 +21,16 @@ import { setupRealtime } from "#modules/routing/realtime.js";
 export async function buildApp({ logger = true } = {}) {
   const app = Fastify({ logger, genReqId: () => randomUUID() });
 
-  app.setValidatorCompiler(validatorCompiler);
-  app.setSerializerCompiler(serializerCompiler);
-
+  // Registrar o CORS
   // PATCH precisa estar na lista: o padrão do plugin é só GET, HEAD e POST.
   await app.register(fastifyCors, {
-    origin: CORS_ORIGIN,
+    origin: "http://localhost:3000",
     credentials: true,
     methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
+
+  app.setValidatorCompiler(validatorCompiler);
+  app.setSerializerCompiler(serializerCompiler);
 
   setupRealtime(app);
 
